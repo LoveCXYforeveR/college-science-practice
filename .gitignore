@@ -1,0 +1,38 @@
+# ===== 凭据：绝对不能提交 =====
+# 构建脚本会把本机 AI Key 写进这个文件用于打包 APK
+ai_default.js
+**/ai_default.js
+ai_key.bin
+ai_config.json
+*.key
+*.pem
+.env
+.env.*
+
+# ===== 个人学习数据 =====
+我的记录.json
+记录快照/
+导出/
+
+# ===== 构建产物 =====
+dist/
+作品-手机版.html
+*.apk
+*.zip
+_android_build/
+_soak/
+soak/_out/
+_*.png
+build/
+
+# ===== 依赖与缓存 =====
+node_modules/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+
+# ===== 系统 =====
+.DS_Store
+Thumbs.db
+desktop.ini
