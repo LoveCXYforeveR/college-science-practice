@@ -38,6 +38,7 @@
 | `bank_extra.js` | 薄弱章节补充题（`BANK_EXTRA`），运行时并入 `BANK` | 9KB |
 | `knowledge.js` | 知识点库（`KP_KB` / `KP_BY_ID`），带覆盖表 | 569KB |
 | `solutions*.js` | 详解数据，按题型分 5 片 | 约 1.4MB |
+| `solutions_papers.js` | 四套模拟卷（A–D）的解答题，带 `paper` / `num` 字段，卡片上显示「A卷」等来源 | 30KB |
 | `practice.js` | 变式题生成（`KP_VARIANTS`） | 55KB |
 | `sw.js` | Service Worker，离线缓存 | 3KB |
 

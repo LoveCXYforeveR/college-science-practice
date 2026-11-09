@@ -1,4 +1,4 @@
-const CACHE = "sd-math-pwa-v42";
+const CACHE = "sd-math-pwa-v43";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const ASSETS = [
   "./bank.js",
   "./bank_extra.js",
   "./solutions.js",
+  "./solutions_papers.js",
   "./solutions_bank.js",
   "./solution_traps.js",
   "./solution_fix.js",

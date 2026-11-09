@@ -547,6 +547,7 @@ A. 甲    B. 乙    C. 丙    D. 丁
 <script src="practice.js"></script>
 <script src="vendor/katex.min.js"></script>
 <script src="solutions.js"></script>
+<script src="solutions_papers.js"></script>
 <script src="solutions_bank.js"></script>
 <script src="solution_traps.js"></script>
 <script src="solution_fix.js"></script>
@@ -1242,18 +1243,21 @@ function solBankAll(){
   var extra = (typeof SOLUTION_EXTRA !== "undefined" && Array.isArray(SOLUTION_EXTRA)) ? SOLUTION_EXTRA : [];
   return bank.concat(extra);
 }
+function solPapersList(){
+  return (typeof SOLUTION_PAPERS !== "undefined" && Array.isArray(SOLUTION_PAPERS)) ? SOLUTION_PAPERS : [];
+}
 function solBuiltIns(){
   var sel = (typeof SOLUTIONS !== "undefined" && Array.isArray(SOLUTIONS)) ? SOLUTIONS : [];
-  return sel.concat(solBankAll()).map(solApplyFixes);
+  return sel.concat(solPapersList()).concat(solBankAll()).map(solApplyFixes);
 }
 function solBankList(){
   return solBankAll().map(solApplyFixes);
 }
 function solAll(){
-  /* 顺序：我的（AI/粘贴，最新在前）→ 精选 → 题库，保证新生成的题出现在最上面 */
+  /* 顺序：我的（AI/粘贴，最新在前）→ 精选 → 套卷 → 题库，保证新生成的题出现在最上面 */
   var mine = solutionBank.map(function(s){ s._mine = true; return s; });
   var sel = (typeof SOLUTIONS !== "undefined" && Array.isArray(SOLUTIONS)) ? SOLUTIONS : [];
-  return mine.concat(sel).concat(solBankList());
+  return mine.concat(sel).concat(solPapersList()).concat(solBankList());
 }
 function solFind(id){
   var b = solBuiltIns().filter(function(x){ return x.id === id; })[0];
@@ -1334,7 +1338,8 @@ function renderSolutionView(){
   var shake = all.filter(function(x){ var m = solMastery[x.id] || x.mastery; return m === "shaky" || m === "unknown"; }).length;
   var sum = document.getElementById("solSummary");
   if (sum) sum.textContent = "精选 " + (typeof SOLUTIONS !== "undefined" ? SOLUTIONS.length : 0) +
-    " 道 · 题库 " + solBankList().length + " 道 · 我的 " + solutionBank.length +
+    " 道 · 套卷 " + solPapersList().length + " 道 · 题库 " + solBankList().length +
+    " 道 · 我的 " + solutionBank.length +
     " 道 · 已掌握 " + done + " · 待复习 " + shake + (q ? (" · 搜到 " + shown.length + " 道") : "");
   /* 到期复习条：解答题按自评排程，到期的集中在这里 */
   var dueN = solDueCount();
@@ -1361,7 +1366,8 @@ function renderSolutionView(){
     var part = parts[pid] || null;
     var m = solMastery[id] || item.mastery || "";
     var srcLabel = item._mine ? (item.source === "ai" ? "AI 生成" : "我加入")
-      : (item.source === "题库" ? "题库" : (item.src === "补充" ? "补充" : "精选"));
+      : (item.paper ? (item.paper + "卷")
+        : (item.source === "题库" ? "题库" : (item.src === "补充" ? "补充" : "精选")));
     var h = '<div class="sol-card' + (m === "known" ? " is-done" : "") + '" data-id="' + escS(id) + '">';
     h += '<div class="scc-top">' +
       '<span class="scc-atom">' + escS(item.atom || item.kp || "综合") + '</span>' +
@@ -9932,7 +9938,7 @@ try { setupFluidBackground(); } catch (e) {}
       <div class="pm-group-title">其他</div>
       <div class="pm-card">
         <button class="pm-tour" id="pmTourBtn" type="button">▶ 看新手教程（约 1 分钟，跟着点一遍就会）</button>
-        <div class="pm-ver">版本 2026.11.09-1930</div>
+        <div class="pm-ver">版本 2026.11.10-0745</div>
       </div>
     </div>
 
