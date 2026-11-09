@@ -55,7 +55,13 @@
 
 ## 快速开始
 
-### 方式一：直接打开（最简单）
+### 方式零：在线直接试
+
+**<https://lovecxyforever.github.io/college-science-practice/>**
+
+不用装任何东西，浏览器打开就能做题。学习记录存在你自己的浏览器里，不上传。
+
+### 方式一：本地跑（最简单）
 
 ```bash
 git clone <this-repo>
