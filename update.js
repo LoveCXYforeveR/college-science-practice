@@ -353,6 +353,11 @@
         state.busy = "";
         saveState();
         markUI();
+        /* 排障打点：和 BOOT_READY / BANK_JSON_OK 一套，不影响用户 */
+        try {
+          console.log("UPDATE_CHECK_OK app=" + state.remoteApp + " content=" + state.remoteContent +
+                      " hasContent=" + (state.hasContent ? 1 : 0) + " hasApp=" + (state.hasApp ? 1 : 0));
+        } catch (e) {}
         return state;
       })
       ["catch"](function (e) {
@@ -360,6 +365,7 @@
         state.lastError = (e && e.message) ? e.message : "网络不可用";
         saveState();
         markUI();
+        try { console.log("UPDATE_CHECK_FAIL " + state.lastError); } catch (er) {}
         throw e;
       });
   }
@@ -423,6 +429,10 @@
           tryMergeBank();
           refreshViews();
           markUI();
+          try {
+            console.log("UPDATE_APPLIED v=" + state.appliedContent +
+                        " sol=" + nSol + " q=" + nQ);
+          } catch (e) {}
           return { solutions: nSol, questions: nQ };
         });
       })
