@@ -1,6 +1,6 @@
 {
   "_说明": [
-    "改这个文件，然后跑 node _proto/publish_update.js 生成 version.json。",
+    "改这个文件，然后跑 node scripts/publish-update.js 生成 version.json。",
     "app      = 主程序版本（改 index.html 和 update.js 里的版本号时要一起改）",
     "content  = 内容版本（题库/套卷解答），只加题就只动这一项",
     "packFile = 内容包文件名，留空表示这一版没有内容更新",
