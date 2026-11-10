@@ -423,6 +423,9 @@
           state.appliedContent = state.remoteContent;
           state.hasContent = false;
           state.busy = "";
+          /* 刚下完当然是最新的，顺带把「x 分钟前检查」刷新成「刚刚」 */
+          state.checkedAt = Date.now();
+          state.lastError = "";
           saveState();
 
           /* 就地生效：套卷列表下次取值就带着新题，题库立刻重建 */
