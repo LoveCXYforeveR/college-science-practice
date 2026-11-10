@@ -21,11 +21,18 @@ const RELEASE = path.join(SRC, "release.json");
 const VERSION_OUT = path.join(SRC, "version.json");
 
 function die(msg) {
-  console.error("\n  ✗ " + msg + "\n");
+  console.error("\n  ✗ " + msg);
+  if (fs.existsSync(VERSION_OUT)) {
+    console.error("    version.json 保持原样，没有改动。");
+  }
+  console.error("");
   process.exit(1);
 }
 function ok(msg) { console.log("  ✓ " + msg); }
 function warn(msg) { console.log("  ! " + msg); }
+
+/* --force：明知道在回退版本，也允许写出去（改错了想修回来时用） */
+const FORCE = process.argv.includes("--force");
 
 /* ---------- 读 release.json ---------- */
 if (!fs.existsSync(RELEASE)) die("找不到 release.json");
@@ -74,13 +81,14 @@ function verCmp(a, b) {
 if (fs.existsSync(VERSION_OUT)) {
   try {
     const prev = JSON.parse(fs.readFileSync(VERSION_OUT, "utf8"));
-    if (prev.content && verCmp(contentVer, prev.content) < 0) {
-      die("content 版本回退了：上一版是 " + prev.content + "，这次是 " + contentVer);
+    if (prev.content && verCmp(contentVer, prev.content) < 0 && !FORCE) {
+      die("content 版本回退了：上一版是 " + prev.content + "，这次是 " + contentVer +
+          "\n    确实是修正错误，加 --force 再跑一次");
     }
     if (prev.content === contentVer) {
       warn("content 版本和上一版相同（" + contentVer + "），手机上不会重新拉内容");
     }
-    if (prev.app && verCmp(appVer, prev.app) < 0) {
+    if (prev.app && verCmp(appVer, prev.app) < 0 && !FORCE) {
       die("app 版本回退了：上一版是 " + prev.app + "，这次是 " + appVer);
     }
     ok("相比上一版：app " + (prev.app || "-") + " → " + appVer +
