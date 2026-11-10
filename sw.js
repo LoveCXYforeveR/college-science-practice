@@ -1,4 +1,4 @@
-const CACHE = "sd-math-pwa-v43";
+const CACHE = "sd-math-pwa-v44";
 const ASSETS = [
   "./",
   "./index.html",
@@ -16,6 +16,7 @@ const ASSETS = [
   "./solution_fix.js",
   "./solution_ai_answers.js",
   "./solution_extra.js",
+  "./update.js",
   "./vendor/katex.min.js",
   "./manifest.json",
   "./icons/icon-180.png",
@@ -44,6 +45,19 @@ self.addEventListener("activate", function(e){
 self.addEventListener("fetch", function(e){
   if (e.request.method !== "GET") return;
   var req = e.request;
+
+  /* 更新清单和内容包必须每次都问网络。
+     它们每次带不同的 ?t= / ?v=，如果走下面「缓存优先」那套，
+     一是读到旧清单就永远发现不了新版本，二是每个 query 都会往缓存里留一份，
+     缓存会无限膨胀。 */
+  var _u = new URL(req.url);
+  if (/\/version\.json$/.test(_u.pathname) || /[?&]v=/.test(_u.search)) {
+    e.respondWith(fetch(req, { cache: "no-store" }).catch(function(){
+      return Response.error();
+    }));
+    return;
+  }
+
   var isPage = req.mode === "navigate" ||
     (req.headers.get("accept") || "").indexOf("text/html") !== -1;
 

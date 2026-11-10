@@ -1952,6 +1952,62 @@ html.is-mobile .pick-bar{bottom:calc(52px + env(safe-area-inset-bottom, 0px)); p
 .pm-ver{
   padding:13px 15px; font-size:11px; color:var(--t3); text-align:center;
 }
+
+/* ===== 「我的 → 其他」：版本行 + 联网更新 =====
+   克制的做法：平时只有一行「版本 x · 检查更新」，
+   真检测到更新才在下面展开一张小卡片，不弹窗、不打断答题。 */
+.pm-upd{padding:13px 15px}
+.pm-upd .pm-ver{padding:0; text-align:left; min-width:0}
+.pm-upd .pm-ver b{font-weight:600; color:var(--t2); font-variant-numeric:tabular-nums}
+.pm-upd-head{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.pm-upd-btn{
+  flex:none; padding:5px 11px; border-radius:8px; font-family:inherit;
+  border:1px solid var(--act-line); background:var(--act-soft); color:var(--act);
+  font-size:11.5px; font-weight:600; cursor:pointer; transition:all .15s;
+}
+.pm-upd-btn:hover:not([disabled]){background:var(--act); border-color:var(--act); color:#fff}
+.pm-upd-btn[disabled]{opacity:.5; cursor:default}
+.pm-upd-body{margin-top:11px}
+.pm-upd-body:empty{display:none}
+
+.upd-note{font-size:11.5px; color:var(--t3); line-height:1.65}
+.upd-note.bad{color:var(--bad)}
+.upd-note + .upd-note{margin-top:5px}
+
+.upd-card{
+  border:1px solid var(--line); border-radius:11px; background:var(--surface2);
+  padding:12px 13px;
+}
+.upd-card-t{font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--act); margin-bottom:9px}
+.upd-row + .upd-row{margin-top:11px; padding-top:11px; border-top:.5px dashed var(--line)}
+.upd-row-h{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.upd-tag{
+  font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:2px 6px;
+  border-radius:5px; background:var(--act-soft); color:var(--act);
+}
+.upd-tag.app{background:var(--data-soft); color:var(--data)}
+.upd-ver{font-size:12px; font-weight:600; color:var(--t1); font-variant-numeric:tabular-nums}
+.upd-size{font-size:10.5px; color:var(--t3); margin-left:auto; font-variant-numeric:tabular-nums}
+.upd-row-b{font-size:11px; color:var(--t3); line-height:1.6; margin-top:4px}
+.upd-notes{margin:10px 0 0; padding-left:15px}
+.upd-notes li{font-size:11.5px; color:var(--t2); line-height:1.7}
+.upd-acts{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+.upd-go{
+  flex:1; min-width:110px; padding:9px 12px; border-radius:9px; border:0;
+  background:var(--act); color:#fff; font-size:12.5px; font-weight:600;
+  font-family:inherit; cursor:pointer; transition:all .15s;
+}
+.upd-go:hover{background:var(--act-h)}
+.upd-go[disabled]{opacity:.55; cursor:default}
+.upd-go.ghost{background:var(--surface); color:var(--act); border:1px solid var(--act-line)}
+.upd-go.ghost:hover{background:var(--act-soft)}
+
+/* 检测到更新时，「我的」入口右上角一个点 —— 比弹 toast 安静，也不会打断答题 */
+#profileBtn.has-dot{position:relative}
+#profileBtn.has-dot::after{
+  content:""; position:absolute; top:5px; right:5px; width:7px; height:7px;
+  border-radius:50%; background:var(--bad); box-shadow:0 0 0 2px var(--bg);
+}
 /* 记录快照默认收起：十几条列表会把「数据」「其他」两组顶到很下面 */
 #snapList{display:none}
 #snapField.open #snapList{display:block}

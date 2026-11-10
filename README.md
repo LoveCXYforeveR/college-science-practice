@@ -121,6 +121,9 @@ APK 构建需要本地 Android SDK（`aapt2` / `d8` / `apksigner`），不在仓
 ├── knowledge.js          知识点库
 ├── solutions*.js         详解（按题型分片，延后加载）
 ├── practice.js           练习交互
+├── update.js             联网检测更新（清单 / 内容热更 / 主程序提示）
+├── release.json          发布源：版本号、更新日志、内容包文件名
+├── version.json          构建产物：给客户端读的清单（scripts/publish-update.js 生成）
 ├── sw.js                 Service Worker（PWA 离线）
 ├── vendor/               KaTeX
 ├── icons/
@@ -128,6 +131,48 @@ APK 构建需要本地 Android SDK（`aapt2` / `d8` / `apksigner`），不在仓
 ```
 
 数据流和关键设计决策见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+
+## 联网更新
+
+三种载体的能力不一样，`update.js` 分开处理：
+
+| 载体 | 代码能不能自己换 | 内容能不能热更 | 做法 |
+|---|---|---|---|
+| 在线版（GitHub Pages） | 能，Service Worker 负责 | 不需要 | 只做版本提示 |
+| 安卓 APK | 不能，`assets/` 只读 | **能** | 数据合并进 IndexedDB，加题不用重装 |
+| 桌面版 | 能（覆盖文件） | 能 | 同 APK |
+
+**为什么不做 APK 静默自更新**：那需要「安装未知应用」权限，还要用户手动放行，体验上是「点了没反应」的重灾区；而且内嵌 Key 的 APK 一旦公开分发就等于泄露 Key。所以主程序更新只做「提示 + 下载到系统下载目录 + 用户点一下装」。
+
+**内容热更不碰代码**，只合并数据：
+
+- 套卷解答 → 并进 `solPapersList()`，id 重复时以本地自带为准
+- 题库 → 按卷 `id` 命中，已有卷按题干去重后追加新题，不覆盖原有题目和顺序
+- `mergeBank()` 幂等，重复调用不会长出重复题
+
+发布一版新内容：
+
+```bash
+# 1. 写内容包（结构见下），在 release.json 里把 content 版本和 packFile 指过去
+# 2. 生成清单（会校验三处版本号一致、结构合法、算 chars + checksum）
+node scripts/publish-update.js
+# 3. 推送
+git add -A && git commit -m "release: 2026.11.11-0900" && git push origin main
+```
+
+内容包结构：
+
+```json
+{
+  "version": "2026.11.11-0900",
+  "solutions": [ { "id": "sp_e01", "paper": "E", "stem": "…", "parts": [ … ] } ],
+  "bank": { "高等数学": [ { "id": "高数第五章", "name": "…", "questions": [ … ] } ] }
+}
+```
+
+两个字段都可以省略，但不能都空。客户端下载后会校验字节长度和 FNV-1a 校验和，任意一项不符就整包丢弃，本地保持原样。
+
+## 工程笔记：几个真实踩过的坑
 
 **为什么是原生 JS 而不是框架？**
 

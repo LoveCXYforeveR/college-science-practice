@@ -553,6 +553,7 @@ A. 甲    B. 乙    C. 丙    D. 丁
 <script src="solution_fix.js"></script>
 <script src="solution_ai_answers.js" onerror="void 0"></script>
 <script src="solution_extra.js" onerror="void 0"></script>
+<script src="update.js" onerror="void 0"></script>
 <script>
 var currentPaper = "A";
 let currentSubject = "高等数学";
@@ -616,6 +617,7 @@ function ensureBank(cb) {
   if (typeof BANK !== "undefined") {
     if (bankState !== "ready") {
       bankState = "ready";
+      try { if (window.UPDATE && UPDATE.mergeBank) UPDATE.mergeBank(); } catch (e) {}
       try { buildBankPapers(); } catch (e) {}
     }
     if (cb) { try { cb(); } catch (e) {} }
@@ -629,6 +631,9 @@ function ensureBank(cb) {
 
   function finish() {
     bankState = "ready";
+    /* 联网更新可能带来了新题库：先合并再建卷，否则首页统计会少数。
+       mergeBank 幂等（按卷 id 命中、按题干去重），重复调用不会长出重复题。 */
+    try { if (window.UPDATE && UPDATE.mergeBank) UPDATE.mergeBank(); } catch (e) {}
     try { buildBankPapers(); } catch (e) {}
     try { if (typeof renderSubjectTabs === "function") renderSubjectTabs(); } catch (e) {}
     try { if (typeof renderPaperTabs === "function") renderPaperTabs(); } catch (e) {}
@@ -1244,7 +1249,15 @@ function solBankAll(){
   return bank.concat(extra);
 }
 function solPapersList(){
-  return (typeof SOLUTION_PAPERS !== "undefined" && Array.isArray(SOLUTION_PAPERS)) ? SOLUTION_PAPERS : [];
+  var base = (typeof SOLUTION_PAPERS !== "undefined" && Array.isArray(SOLUTION_PAPERS)) ? SOLUTION_PAPERS : [];
+  /* 联网更新过的套卷解答并进来：id 重复时以本地自带的为准 */
+  try {
+    if (window.UPDATE && typeof UPDATE.extraSolutions === "function") {
+      var extra = UPDATE.extraSolutions();
+      if (extra && extra.length) return base.concat(extra);
+    }
+  } catch (e) {}
+  return base;
 }
 function solBuiltIns(){
   var sel = (typeof SOLUTIONS !== "undefined" && Array.isArray(SOLUTIONS)) ? SOLUTIONS : [];
@@ -5117,6 +5130,7 @@ function openProfileModal(firstRun, focusGoal) {
       "当前导出通道：" + saveChannel() + "。";
   }
   renderSnapshotList();
+  try { if (window.UPDATE) UPDATE.renderPanel(); } catch (e) {}
   m.classList.add("show");
   document.body.classList.add("modal-open");
   var target = focusGoal ? document.getElementById("pmGoal") : document.getElementById("pmNick");
@@ -6428,6 +6442,21 @@ function startTour(){
   });
 })();
 
+/* 「检查更新」同理：按钮 HTML 在脚本之后才解析，直接取会是 null。 */
+(function bindUpdateEntry(){
+  document.addEventListener("click", function(e){
+    var t = e.target;
+    if (!t || !t.closest || !t.closest("#pmCheckBtn")) return;
+    if (!window.UPDATE) { try { toast("这台设备的版本不支持联网更新"); } catch (err) {} return; }
+    UPDATE.check().then(function(){
+      var s = UPDATE.state;
+      if (!s.hasContent && !s.hasApp) { try { toast("已是最新"); } catch (err) {} }
+    })["catch"](function(err){
+      try { toast("检查失败：" + ((err && err.message) || "网络不可用")); } catch (err2) {}
+    });
+  });
+})();
+
 function init() {
   /* ===== 关键修复：同步恢复 =====
      localStorage 是唯一 100% 同步可用的存储，先无条件恢复它，
@@ -6471,6 +6500,9 @@ var booted = false;
     checkFileMode();
     applyTheme(currentTheme(), false);
     showView("home");
+    /* 联网检测更新：内部自己等 2.5 秒再发请求，不抢首屏；
+       离线、超时、清单坏了一律静默，只在「我的」里留一行状态。 */
+    try { if (window.UPDATE) UPDATE.boot(); } catch (e) {}
     /* 首页画好就通知原生撤掉启动页。
        onPageFinished 会被启动渲染拖后一两秒，用户会对着 logo 干等。 */
     try {
@@ -9938,7 +9970,13 @@ try { setupFluidBackground(); } catch (e) {}
       <div class="pm-group-title">其他</div>
       <div class="pm-card">
         <button class="pm-tour" id="pmTourBtn" type="button">▶ 看新手教程（约 1 分钟，跟着点一遍就会）</button>
-        <div class="pm-ver">版本 2026.11.10-0745</div>
+        <div class="pm-upd">
+          <div class="pm-upd-head">
+            <span class="pm-ver">版本 <b id="pmVerText">2026.11.10-1500</b></span>
+            <button class="pm-upd-btn" id="pmCheckBtn" type="button">检查更新</button>
+          </div>
+          <div class="pm-upd-body" id="pmUpdBody"></div>
+        </div>
       </div>
     </div>
 
